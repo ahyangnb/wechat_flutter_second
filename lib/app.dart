@@ -72,7 +72,7 @@ class _StartPageState extends State<StartPage> {
   Future init() async {
     await ImApi.init(context);
 
-    await ImApi.checkLogin();
+    await ImApi.checkLogin(context);
     isInitOk = true;
     setState(() {});
   }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:wechat_flutter/entity/api_entity.dart';
+import 'package:wechat_flutter/http/api_v2.dart';
 import 'package:wechat_flutter/im/login_handle.dart';
 import 'package:wechat_flutter/pages/login/select_location_page.dart';
 import 'package:wechat_flutter/provider/login_model.dart';
@@ -17,6 +19,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   TextEditingController _tC = new TextEditingController();
+  TextEditingController _pwC = new TextEditingController();
 
   @override
   void initState() {
@@ -27,6 +30,24 @@ class _LoginPageState extends State<LoginPage> {
   initEdit() async {
     final user = await SharedUtil.instance.getString(Keys.account);
     _tC.text = user ?? '';
+  }
+
+  Future loginHandle() async {
+    final LoginRspEntity value =
+        await ApiV2.login(context, _tC.text, _pwC.text);
+
+    if (value == null) {
+      return;
+    }
+
+    Store(WeChatActions.userToken()).value = "Bearer " + value.accessToken;
+    final sinValue = await ApiV2.timGetSig(context);
+    if (!strNoEmpty(sinValue)) {
+      return;
+    }
+
+    final UserInfoRspEntity meValue = await ApiV2.userMe(context);
+    login(context, meValue.kid, sinValue);
   }
 
   Widget bottomItem(item) {
@@ -125,6 +146,37 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
+        new Container(
+          padding: EdgeInsets.only(bottom: 5.0),
+          decoration: BoxDecoration(
+              border:
+                  Border(bottom: BorderSide(color: Colors.grey, width: 0.15))),
+          child: new Row(
+            children: <Widget>[
+              new Container(
+                width: winWidth(context) * 0.25,
+                alignment: Alignment.centerLeft,
+                margin: EdgeInsets.only(left: 25.0),
+                child: new Text(
+                  "密码",
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                ),
+              ),
+              new Expanded(
+                  child: new TextField(
+                controller: _pwC,
+                maxLines: 1,
+                obscureText: true,
+                style: TextStyle(textBaseline: TextBaseline.alphabetic),
+                decoration: InputDecoration(
+                    hintText: "请输入密码", border: InputBorder.none),
+                onChanged: (text) {
+                  setState(() {});
+                },
+              ))
+            ],
+          ),
+        ),
         new Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
           child: new InkWell(
@@ -146,13 +198,7 @@ class _LoginPageState extends State<LoginPage> {
               ? Color.fromRGBO(226, 226, 226, 1.0)
               : Color.fromRGBO(8, 191, 98, 1.0),
           onTap: () {
-            if (_tC.text == '') {
-              showToast(context, '随便输入三位或以上');
-            } else if (_tC.text.length >= 3) {
-              login(_tC.text, context);
-            } else {
-              showToast(context, '请输入三位或以上');
-            }
+            loginHandle();
           },
         ),
       ],

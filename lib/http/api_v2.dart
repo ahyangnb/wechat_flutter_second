@@ -83,45 +83,75 @@ class ApiV2 {
   }
 
   /// 获取自己的信息
-  static void userMe(BuildContext context) async {
+  static Future<UserInfoRspEntity> userMe(BuildContext context) async {
     Map<String, dynamic> params = {};
 
+    Completer<UserInfoRspEntity> completer = Completer<UserInfoRspEntity>();
     Req.getInstance().get(
       API2.userMe,
-      (v) async {},
+      (v) async {
+        UserInfoRspEntity userInfoRspEntity =
+            UserInfoRspEntity.fromJson(v['data']);
+        completer.complete(userInfoRspEntity);
+      },
       params: params,
       errorCallBack: (String msg, int code) {
         showToast(context, msg);
+        completer.complete(null);
       },
     );
+    return completer.future;
   }
 
   /// 登录
-  static void login(BuildContext context) async {
-    Map<String, dynamic> params = {};
+  static Future<LoginRspEntity> login(
+      BuildContext context, String phone, String password) async {
+    if (!strNoEmpty(phone)) {
+      showToast(context, '请输入手机号');
+      return null;
+    }
+    if (!strNoEmpty(password)) {
+      showToast(context, '请输入密码');
+      return null;
+    }
 
+    Map<String, dynamic> params = {
+      "email": '$phone@$phone.com',
+      "password": password,
+    };
+
+    Completer<LoginRspEntity> completer = Completer<LoginRspEntity>();
     Req.getInstance().post(
       API2.login,
-      (v) async {},
+      (v) async {
+        LoginRspEntity rspEntity = LoginRspEntity.fromJson(v['data']);
+        completer.complete(rspEntity);
+      },
       params: params,
       errorCallBack: (String msg, int code) {
         showToast(context, msg);
       },
     );
+    return completer.future;
   }
 
   /// 获取腾讯云签名
-  static void timGetSig(BuildContext context) async {
+  static Future<String> timGetSig(BuildContext context) async {
     Map<String, dynamic> params = {};
 
+    Completer<String> completer = Completer<String>();
     Req.getInstance().get(
       API2.timGetSig,
-      (v) async {},
+      (v) async {
+        completer.complete(v["sig"]);
+      },
       params: params,
       errorCallBack: (String msg, int code) {
         showToast(context, msg);
+        completer.complete(null);
       },
     );
+    return completer.future;
   }
 
   /// 搜索用户

@@ -145,6 +145,19 @@ class Req {
     final id = _id++;
     int statusCode;
     try {
+      print('HTTP_REQUEST_URL::[$id]::$url');
+      print('HTTP_REQUEST_BODY::[$id]::${params ?? ' no'}');
+
+      if (url == API2.login) {
+        _client.options.headers['Authorization'] = null;
+        print(
+            'HTTP_REQUEST_HEADER::[$id]::${json.encode(_client.options.headers)}');
+      } else if (strNoEmpty(Data.userToken())) {
+        _client.options.headers['Authorization'] = Data.userToken();
+        print(
+            'HTTP_REQUEST_HEADER::[$id]::${json.encode(_client.options.headers)}');
+      }
+
       Response response;
       if (method == RequestType.GET) {
         ///组合GET请求的参数
@@ -193,19 +206,20 @@ class Req {
           Map data = response.data;
           callBack(data);
         }
-        print('HTTP_REQUEST_URL::[$id]::$url');
-        print('HTTP_REQUEST_BODY::[$id]::${params ?? ' no'}');
-        print('HTTP_RESPONSE_BODY::[$id]::${json.encode(response.data)}');
       }
+
+      print('HTTP_RESPONSE_BODY::[$id]::${json.encode(response.data)}');
 
       ///处理错误部分
       if (statusCode < 0) {
-        print("HTTP_REQUEST_URL::$url");
         _handError(errorCallBack, statusCode);
         return;
       }
     } catch (e) {
-      print("HTTP_REQUEST_URL::$url");
+      // if(e is DioErrorType){
+      //   return;
+      // }
+      print("HTTP_RESPONSE_ERROR::[$id]::${e.toString()}");
       _handError(errorCallBack, statusCode);
     }
   }

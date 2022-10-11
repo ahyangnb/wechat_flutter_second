@@ -12,12 +12,17 @@ class WeChatActions {
   static String voiceImg() => 'voiceImg';
 
   static String user() => 'user';
+
+  static String userToken() => 'userToken';
 }
 
 class Data {
   static String msg() => Store(WeChatActions.msg()).value ?? '';
 
+  /// kUserId
   static String user() => Store(WeChatActions.user()).value ?? '';
+
+  static String userToken() => Store(WeChatActions.userToken()).value ?? '';
 
   static String voiceImg() => Store(WeChatActions.voiceImg()).value ?? '';
 

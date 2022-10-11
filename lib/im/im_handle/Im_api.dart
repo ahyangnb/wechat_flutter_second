@@ -14,6 +14,8 @@ import 'package:tencent_im_sdk_plugin/models/v2_tim_callback.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_user_full_info.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_value_callback.dart';
 import 'package:tencent_im_sdk_plugin/tencent_im_sdk_plugin.dart';
+import 'package:wechat_flutter/entity/api_entity.dart';
+import 'package:wechat_flutter/http/api_v2.dart';
 import 'package:wechat_flutter/im/im_handle/GenerateTestUserSig.dart';
 import 'package:wechat_flutter/provider/im/im_event.dart';
 import 'package:wechat_flutter/tools/app_config.dart';
@@ -62,7 +64,7 @@ class ImApi {
     addIMEventListener(context);
 
     // 检测登录
-    checkLogin();
+    checkLogin(context);
   }
 
   /*
@@ -243,7 +245,7 @@ class ImApi {
   }
 
   /// 检测登录
-  static Future checkLogin() async {
+  static Future checkLogin(BuildContext context) async {
     // 获取登录状态
     final int loginStatus = await getLoginStatus();
 
@@ -281,22 +283,20 @@ class ImApi {
       return;
     }
 
+    /// 用户签名
+    final sinValue = await ApiV2.timGetSig(context);
+    if (!strNoEmpty(sinValue)) {
+      return;
+    }
+
     // 登录
-    await login(userId);
+    await login(userId, sinValue);
   }
 
   /*
   * 登录
   * */
-  static Future<V2TimCallback> login(String userID) async {
-    // 正式环境请在服务端计算userSIg
-    String userSig = new GenerateTestUserSig(
-      sdkappid: AppConfig.IMSdkAppID,
-      key: AppConfig.ImSdkSign,
-    ).genSig(
-      identifier: userID,
-      expire: 7 * 24 * 60 * 1000, // userSIg有效期
-    );
+  static Future<V2TimCallback> login(String userID, String userSig) async {
     V2TimCallback res = await TencentImSDKPlugin.v2TIMManager.login(
       userID: userID,
       userSig: userSig,
