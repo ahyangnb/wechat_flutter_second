@@ -216,10 +216,21 @@ class Req {
         return;
       }
     } catch (e) {
-      // if(e is DioErrorType){
-      //   return;
-      // }
-      print("HTTP_RESPONSE_ERROR::[$id]::${e.toString()}");
+      print("HTTP_RESPONSE_ERROR::[$id]::${e.runtimeType}::${e.toString()}");
+      if (e is DioError) {
+        DioError dioError = e;
+        if (dioError.response.statusCode == 401) {
+          if (url == API2.login) {
+            errorCallBack("手机号或密码错误", dioError.response.statusCode);
+          } else {
+            errorCallBack("用户验证失败", dioError.response.statusCode);
+          }
+        } else {
+          errorCallBack(
+              dioError.response.data.toString(), dioError.response.statusCode);
+        }
+        return;
+      }
       _handError(errorCallBack, statusCode);
     }
   }

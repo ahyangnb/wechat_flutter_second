@@ -144,7 +144,9 @@ class _ChatPageState extends State<ChatPage> {
       0,
       new V2TimMessage(
           textElem: V2TimTextElem(text: text),
-          sender: Data.user(),
+          sender: strNoEmpty(Data.user())
+              ? Data.user()
+              : (await SharedUtil.instance.getString(Keys.account)),
           id: '1',
           elemType: 9),
     );

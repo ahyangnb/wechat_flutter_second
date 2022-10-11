@@ -43,6 +43,9 @@ class ApiV2 {
       API2.register,
       (v) async {
         completer.complete(true);
+
+        /// 注册完立刻调用一次登录，否则uid不存在腾讯云im
+        login(context, phone, password);
       },
       params: params,
       errorCallBack: (String msg, int code) {
@@ -155,30 +158,46 @@ class ApiV2 {
   }
 
   /// 搜索用户
-  static void searchUser(BuildContext context, String mobile) async {
+  static Future<UserInfoRspEntity> searchUser(
+      BuildContext context, String value) async {
+    if (!strNoEmpty(value)) {
+      showToast(context, '搜索内容不能为空');
+      return null;
+    }
+
     Map<String, dynamic> params = {
       /// 需要服务端返回的字段，不传则返回所有的字段。
       "fields": ["kid", "mobile", "id"],
       "filter": {
         "_or": [
           {
-            "mobile": {"_eq": mobile}
+            "mobile": {"_eq": value}
           },
           {
-            "kid": {"_eq": "1234"}
+            "kid": {"_eq": value}
           }
         ]
       },
     };
 
+    Completer<UserInfoRspEntity> completer = Completer<UserInfoRspEntity>();
     Req.getInstance().get(
       API2.searchUser,
-      (v) async {},
+      (v) async {
+        if (v['data'] == null) {
+          return;
+        }
+        UserInfoRspEntity userInfoRspEntity =
+            UserInfoRspEntity.fromJson(v['data'][0]);
+        completer.complete(userInfoRspEntity);
+      },
       params: params,
       errorCallBack: (String msg, int code) {
         showToast(context, msg);
+        completer.complete(null);
       },
     );
+    return completer.future;
   }
 
   /// 更新用户资料

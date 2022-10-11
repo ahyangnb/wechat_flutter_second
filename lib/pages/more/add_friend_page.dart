@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:tencent_im_sdk_plugin/manager/v2_tim_manager.dart';
 import 'package:tencent_im_sdk_plugin/models/v2_tim_user_full_info.dart';
+import 'package:wechat_flutter/entity/api_entity.dart';
+import 'package:wechat_flutter/http/api_v2.dart';
 import 'package:wechat_flutter/im/entity/person_info_entity.dart';
 import 'package:wechat_flutter/im/im_handle/Im_api.dart';
 import 'package:wechat_flutter/pages/mine/code_page.dart';
@@ -171,14 +173,19 @@ class _AddFriendPageState extends State<AddFriendPage> {
 
   // 搜索好友
   Future search(String userName) async {
+    final UserInfoRspEntity value = await ApiV2.searchUser(context, userName);
+    if (value == null) {
+      return;
+    }
+
     /// 如果是搜索自己的话直接提示出来
-    if (userName == Data.user()) {
+    if (value.kid == Data.user()) {
       showToast(context, '你不能添加自己到通讯录');
       return;
     }
 
     final List<V2TimUserFullInfo> userInfoList =
-        await ImApi.getUsersInfo([userName]);
+        await ImApi.getUsersInfo([value.kid]);
     setState(() {
       /// 获取用户信息失败了
       if (!listNoEmpty(userInfoList)) {
