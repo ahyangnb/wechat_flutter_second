@@ -194,10 +194,12 @@ class Req {
 
       ///处理错误部分
       if (statusCode < 0) {
+        print("HTTP_REQUEST_URL::$url");
         _handError(errorCallBack, statusCode);
         return;
       }
     } catch (e) {
+      print("HTTP_REQUEST_URL::$url");
       _handError(errorCallBack, statusCode);
     }
   }

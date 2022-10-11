@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:wechat_flutter/http/api_v2.dart';
 import 'package:wechat_flutter/provider/login_model.dart';
 
 import 'package:wechat_flutter/tools/wechat_flutter.dart';
 import 'package:wechat_flutter/ui/view/edit_view.dart';
+import 'package:wechat_flutter/ui_commom/bt/small_button.dart';
 
 import 'select_location_page.dart';
 
@@ -25,6 +27,11 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController phoneC = new TextEditingController();
   FocusNode pWF = new FocusNode();
   TextEditingController pWC = new TextEditingController();
+  FocusNode codeF = new FocusNode();
+  TextEditingController codeC = new TextEditingController();
+
+  Timer timer;
+  RxInt count = 0.obs;
 
   String localAvatarImgPath = '';
 
@@ -115,6 +122,28 @@ class _RegisterPageState extends State<RegisterPage> {
         onTap: () => setState(() {}),
       ),
       new EditView(
+        label: '验证码',
+        hint: '输入验证码',
+        controller: codeC,
+        focusNode: codeF,
+        bottomLineColor:
+            codeF.hasFocus ? Colors.green : lineColor.withOpacity(0.5),
+        onTap: () => setState(() {}),
+        onChanged: (str) {
+          setState(() {});
+        },
+        rWidget: Obx(() {
+          return SmallButton(
+            color: count.value == 0 ? null : Colors.grey,
+            margin: EdgeInsets.all(0),
+            onPressed: () => sendCode(),
+            padding: EdgeInsets.all(0),
+            minWidth: 80,
+            child: Text(count.value == 0 ? '发送' : "${count.value}"),
+          );
+        }),
+      ),
+      new EditView(
         label: S.of(context).passWord,
         hint: S.of(context).pwTip,
         controller: pWC,
@@ -175,8 +204,7 @@ class _RegisterPageState extends State<RegisterPage> {
             showToast(context, '请输入正确的手机号');
             return;
           }
-          showToast(context, '注册成功');
-          Get.offNamedUntil('/', (route) => false);
+          registerHandle();
         },
       ),
     ];
@@ -201,5 +229,43 @@ class _RegisterPageState extends State<RegisterPage> {
         onTap: () => setState(() => {}),
       ),
     );
+  }
+
+  void registerHandle() {
+    // ApiV2.register(context, phone: phone, password: password, code: code, token: token);
+    showToast(context, '注册成功');
+    Get.offNamedUntil('/', (route) => false);
+  }
+
+  void cancelTimer() {
+    timer?.cancel();
+    timer = null;
+  }
+
+  Future sendCode() async {
+    if (count.value != 0) {
+      return;
+    }
+    cancelTimer();
+
+    final bool isSuccess = await ApiV2.smsGet(context, phone: phoneC.text);
+    if (!isSuccess) {
+      return;
+    }
+
+    count.value = 60;
+    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      count.value--;
+      if (count.value <= 0) {
+        cancelTimer();
+        return;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    cancelTimer();
   }
 }

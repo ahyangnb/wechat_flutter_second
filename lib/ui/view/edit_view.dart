@@ -12,6 +12,7 @@ class EditView extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final bool obscureText;
   final TextInputType keyboardType;
+  final Widget rWidget;
 
   EditView({
     this.label,
@@ -23,6 +24,7 @@ class EditView extends StatelessWidget {
     this.onChanged,
     this.obscureText = false,
     this.keyboardType,
+    this.rWidget,
   });
 
   @override
@@ -48,6 +50,7 @@ class EditView extends StatelessWidget {
             keyboardType: keyboardType,
           ),
         ),
+        if (rWidget != null) rWidget,
       ],
     );
 
