@@ -92,6 +92,7 @@ unlinked_spec.ds
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/config/
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
@@ -112,3 +113,7 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+buildApk.sh
+buildIos.sh
+reDep.sh

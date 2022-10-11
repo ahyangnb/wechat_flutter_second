@@ -53,7 +53,7 @@ dependencies:
   #音频处理
   flutter_sound: 9.2.13
   #权限处理
-  permission_handler: 9.2.0
+  permission_handler: 10.1.0
   #音频处理
   audioplayers: 1.1.1
   #视频播放
