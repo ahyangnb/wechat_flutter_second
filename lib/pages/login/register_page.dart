@@ -111,6 +111,7 @@ class _RegisterPageState extends State<RegisterPage> {
         hint: S.of(context).phoneNumberHint,
         controller: phoneC,
         focusNode: phoneF,
+        keyboardType: TextInputType.number,
         onTap: () => setState(() {}),
       ),
       new EditView(
@@ -118,6 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
         hint: S.of(context).pwTip,
         controller: pWC,
         focusNode: pWF,
+        obscureText: true,
         bottomLineColor:
             pWF.hasFocus ? Colors.green : lineColor.withOpacity(0.5),
         onTap: () => setState(() {}),

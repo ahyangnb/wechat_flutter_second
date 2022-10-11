@@ -6,7 +6,7 @@ var _id = 0;
 typedef OnData(t);
 typedef OnError(String msg, int code);
 
-enum RequestType { GET, POST }
+enum RequestType { GET, POST, PATCH }
 
 class Req {
   static Req _instance;
@@ -41,7 +41,7 @@ class Req {
   void get(
     String url,
     OnData callBack, {
-    Map<String, String> params,
+    Map<String, dynamic> params,
     OnError errorCallBack,
     CancelToken token,
   }) async {
@@ -59,7 +59,7 @@ class Req {
   void post(
     String url,
     OnData callBack, {
-    Map<String, String> params,
+    Map<String, dynamic> params,
     OnError errorCallBack,
     CancelToken token,
   }) async {
@@ -67,6 +67,23 @@ class Req {
       url,
       callBack,
       method: RequestType.POST,
+      params: params,
+      errorCallBack: errorCallBack,
+      token: token,
+    );
+  }
+
+  void patch(
+    String url,
+    OnData callBack, {
+    Map<String, dynamic> params,
+    OnError errorCallBack,
+    CancelToken token,
+  }) async {
+    this._request(
+      url,
+      callBack,
+      method: RequestType.PATCH,
       params: params,
       errorCallBack: errorCallBack,
       token: token,
@@ -93,11 +110,31 @@ class Req {
     );
   }
 
+  //patch请求
+  void patchUpload(
+    String url,
+    OnData callBack,
+    ProgressCallback progressCallBack, {
+    FormData formData,
+    OnError errorCallBack,
+    CancelToken token,
+  }) async {
+    this._request(
+      url,
+      callBack,
+      method: RequestType.PATCH,
+      formData: formData,
+      errorCallBack: errorCallBack,
+      progressCallBack: progressCallBack,
+      token: token,
+    );
+  }
+
   void _request(
     String url,
     OnData callBack, {
     RequestType method,
-    Map<String, String> params,
+    Map<String, dynamic> params,
     FormData formData,
     OnError errorCallBack,
     ProgressCallback progressCallBack,
@@ -114,6 +151,18 @@ class Req {
               queryParameters: params, cancelToken: token);
         } else {
           response = await _client.get(url, cancelToken: token);
+        }
+      } else if (method == RequestType.PATCH) {
+        ///组合GET请求的参数
+        if (mapNoEmpty(params)) {
+          response = await _client.patch(
+            url,
+            queryParameters: params,
+            cancelToken: token,
+            data: formData ?? params,
+          );
+        } else {
+          response = await _client.patch(url, cancelToken: token);
         }
       } else {
         if (mapNoEmpty(params) || formData != null) {

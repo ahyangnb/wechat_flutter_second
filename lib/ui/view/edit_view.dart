@@ -10,15 +10,20 @@ class EditView extends StatelessWidget {
   final FocusNode focusNode;
   final GestureTapCallback onTap;
   final ValueChanged<String> onChanged;
+  final bool obscureText;
+  final TextInputType keyboardType;
 
-  EditView(
-      {this.label,
-      this.hint,
-      this.controller,
-      this.bottomLineColor,
-      this.focusNode,
-      this.onTap,
-      this.onChanged});
+  EditView({
+    this.label,
+    this.hint,
+    this.controller,
+    this.bottomLineColor,
+    this.focusNode,
+    this.onTap,
+    this.onChanged,
+    this.obscureText = false,
+    this.keyboardType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +44,8 @@ class EditView extends StatelessWidget {
                 InputDecoration(hintText: hint ?? '', border: InputBorder.none),
             onTap: onTap ?? () {},
             onChanged: onChanged ?? (str) {},
+            obscureText: obscureText,
+            keyboardType: keyboardType,
           ),
         ),
       ],
