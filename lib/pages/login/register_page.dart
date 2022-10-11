@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:wechat_flutter/entity/api_entity.dart';
 import 'package:wechat_flutter/http/api_v2.dart';
 import 'package:wechat_flutter/provider/login_model.dart';
 
@@ -34,6 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
   RxInt count = 0.obs;
 
   String localAvatarImgPath = '';
+  String codeToken = "";
 
   _openGallery() async {
     XFile img = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -231,8 +233,15 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void registerHandle() {
-    // ApiV2.register(context, phone: phone, password: password, code: code, token: token);
+  Future registerHandle() async {
+    final bool rsp = await ApiV2.register(context,
+        phone: phoneC.text,
+        password: pWC.text,
+        code: codeC.text,
+        token: codeToken);
+    if (!rsp) {
+      return;
+    }
     showToast(context, '注册成功');
     Get.offNamedUntil('/', (route) => false);
   }
@@ -248,9 +257,17 @@ class _RegisterPageState extends State<RegisterPage> {
     }
     cancelTimer();
 
-    final bool isSuccess = await ApiV2.smsGet(context, phone: phoneC.text);
-    if (!isSuccess) {
+    final CodeRspEntity codeRspEntity =
+        await ApiV2.smsGet(context, phone: phoneC.text);
+    if (codeRspEntity == null) {
       return;
+    }
+
+    codeToken = codeRspEntity.token;
+
+    if (strNoEmpty(codeRspEntity.code)) {
+      codeC.text = codeRspEntity.code;
+      setState(() {});
     }
 
     count.value = 60;

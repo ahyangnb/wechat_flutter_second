@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:wechat_flutter/entity/api_entity.dart';
 import 'package:wechat_flutter/tools/wechat_flutter.dart';
 
 class ApiV2 {
@@ -11,6 +12,23 @@ class ApiV2 {
     @required String code,
     @required String token,
   }) async {
+    if (!strNoEmpty(token)) {
+      showToast(context, '请先获取验证码');
+      return false;
+    }
+    if (!strNoEmpty(phone)) {
+      showToast(context, "请输入手机号");
+      return false;
+    }
+    if (!strNoEmpty(password)) {
+      showToast(context, "请输入密码");
+      return false;
+    }
+    if (!strNoEmpty(code)) {
+      showToast(context, "请输入验证码");
+      return false;
+    }
+
     Map<String, dynamic> params = {
       "phone": phone,
       "password": password,
@@ -28,7 +46,7 @@ class ApiV2 {
       },
       params: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
         completer.complete(false);
       },
     );
@@ -36,28 +54,29 @@ class ApiV2 {
   }
 
   /// 获取验证码
-  static Future<bool> smsGet(
+  static Future<CodeRspEntity> smsGet(
     BuildContext context, {
     @required String phone,
   }) async {
     if (!strNoEmpty(phone)) {
       showToast(context, '请输入手机号');
-      return false;
+      return null;
     }
 
-    Completer<bool> completer = Completer<bool>();
+    Completer<CodeRspEntity> completer = Completer<CodeRspEntity>();
 
     Map<String, dynamic> params = {"phone": phone};
 
     Req.getInstance().get(
       API2.smsGet,
       (v) async {
-        completer.complete(true);
+        CodeRspEntity codeRspEntity = CodeRspEntity.fromJson(v);
+        completer.complete(codeRspEntity);
       },
       params: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
-        completer.complete(false);
+        showToast(context, msg);
+        completer.complete(null);
       },
     );
     return completer.future;
@@ -72,7 +91,7 @@ class ApiV2 {
       (v) async {},
       params: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
       },
     );
   }
@@ -86,7 +105,7 @@ class ApiV2 {
       (v) async {},
       params: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
       },
     );
   }
@@ -100,7 +119,7 @@ class ApiV2 {
       (v) async {},
       params: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
       },
     );
   }
@@ -127,7 +146,7 @@ class ApiV2 {
       (v) async {},
       params: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
       },
     );
   }
@@ -141,7 +160,7 @@ class ApiV2 {
       (v) async {},
       params: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
       },
     );
   }
@@ -159,7 +178,7 @@ class ApiV2 {
       (int count, int total) {},
       formData: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
       },
     );
   }
@@ -178,7 +197,7 @@ class ApiV2 {
       (int count, int total) {},
       formData: params,
       errorCallBack: (String msg, int code) {
-        showToast(context, "出现错误:$code");
+        showToast(context, msg);
       },
     );
   }

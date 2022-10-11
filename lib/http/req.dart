@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:wechat_flutter/tools/wechat_flutter.dart';
 
@@ -180,6 +182,10 @@ class Req {
       statusCode = response.statusCode;
 
       if (response != null) {
+        if (response.data is Map && strNoEmpty(response.data["error"])) {
+          errorCallBack(response.data["error"], -1);
+          return;
+        }
         if (response.data is List) {
           Map data = response.data[0];
           callBack(data);
@@ -189,7 +195,7 @@ class Req {
         }
         print('HTTP_REQUEST_URL::[$id]::$url');
         print('HTTP_REQUEST_BODY::[$id]::${params ?? ' no'}');
-        print('HTTP_RESPONSE_BODY::[$id]::${response.data}');
+        print('HTTP_RESPONSE_BODY::[$id]::${json.encode(response.data)}');
       }
 
       ///处理错误部分
